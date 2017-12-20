@@ -11,5 +11,21 @@ npm install react-head-tags --save
 ## Usage
 
 ```js
-import 'react-head-tags'
+import React from 'react'
+import { renderToNodeStream } from 'react-dom/server'
+import { HeadManager, HeadTags } from 'react-head-tags'
+
+let collectedHeadTags
+renderToNodeStream(
+  <HeadManager
+    onHeadTagsChange={headTags => {
+      collectedHeadTags = headTags
+    }}
+  >
+    <HeadTags>
+      <title>Title</title>
+      <meta name="description" content="testing" />
+    </HeadTags>
+  </HeadManager>,
+)
 ```
