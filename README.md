@@ -10,6 +10,8 @@ npm install react-head-tags --save
 
 ## Usage
 
+<!-- eslint-disable no-unused-vars -->
+
 ```js
 import React from 'react'
 import { renderToNodeStream } from 'react-dom/server'
