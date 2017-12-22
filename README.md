@@ -17,11 +17,11 @@ import React from 'react'
 import { renderToNodeStream } from 'react-dom/server'
 import { HeadManager, HeadTags } from 'react-head-tags'
 
-let collectedHeadTags
+let headTags
 renderToNodeStream(
   <HeadManager
-    onHeadTagsChange={headTags => {
-      collectedHeadTags = headTags
+    onHeadTagsChange={tags => {
+      headTags = tags
     }}
   >
     <HeadTags>

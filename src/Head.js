@@ -8,7 +8,7 @@ class Head extends React.Component {
 
     this.state = {
       canUseDOM: false,
-      tags: [],
+      tags: props.tags,
     }
   }
 

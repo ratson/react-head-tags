@@ -4,6 +4,7 @@ import ExecutionEnvironment from 'fbjs/lib/ExecutionEnvironment'
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import NanoEvents from 'nanoevents'
+
 import Head from './Head'
 
 function buildSelectot(component) {
@@ -46,10 +47,11 @@ class HeadManager extends Component {
     this.emitter = new NanoEvents()
     this.headTags = []
     this.headTagsIndex = {}
+    this.selectorIndex = {}
   }
 
   getChildContext() {
-    const { headTags, headTagsIndex } = this
+    const { headTags, headTagsIndex, selectorIndex } = this
     const { onHeadTagsChange } = this.props
     return {
       reactHeadTags: {
@@ -58,14 +60,18 @@ class HeadManager extends Component {
             const selector = buildSelectot(component)
             const i = headTagsIndex[selector]
             if (i >= 0) {
-              if (headTags[i] === component) {
+              const existingComponent = headTags[i]
+              if (existingComponent === component) {
                 return false
               }
+              selectorIndex[component] = selectorIndex[existingComponent]
+              delete selectorIndex[existingComponent]
               headTags[i] = component
-              return false
+              return true
             }
 
             headTagsIndex[selector] = headTags.length
+            selectorIndex[component] = selector
             headTags.push(component)
 
             if (ExecutionEnvironment.canUseDOM && selector.indexOf('{') !== 0) {
@@ -86,6 +92,17 @@ class HeadManager extends Component {
             }
           }
         },
+        remove: children => {
+          React.Children.forEach(children, component => {
+            const selector = selectorIndex[component]
+            const i = headTagsIndex[selector]
+            // TODO null is insert to avoid updating other indexes,
+            // should use better data structure to not use placeholder
+            headTags.splice(i, 1, null)
+            delete headTagsIndex[selector]
+            delete selectorIndex[component]
+          })
+        },
       },
     }
   }
@@ -94,8 +111,8 @@ class HeadManager extends Component {
     const { children } = this.props
     return (
       <React.Fragment>
-        <Head emitter={this.emitter} />
         {children}
+        <Head emitter={this.emitter} tags={this.headTags} />
       </React.Fragment>
     )
   }

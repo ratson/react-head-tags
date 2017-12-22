@@ -21,6 +21,14 @@ class HeadTags extends React.Component {
     }
   }
 
+  componentWillUnmount() {
+    const { children } = this.props
+    const { reactHeadTags } = this.context
+    if (reactHeadTags) {
+      reactHeadTags.remove(children)
+    }
+  }
+
   render() {
     return null
   }
