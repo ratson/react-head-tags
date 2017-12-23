@@ -97,3 +97,22 @@ it('accumulate different meta tags by name', async () => {
     '<meta name="title" value="title"><meta name="desc" value="desc1">',
   )
 })
+
+it('keep single <link rel="canonical" />', async () => {
+  document.head.innerHTML = ''
+
+  mount(
+    <HeadManager>
+      <HeadTags>
+        <link rel="canonical" href="http://localhost/old" />
+      </HeadTags>
+      <HeadTags>
+        <link rel="canonical" href="http://localhost/new" />
+      </HeadTags>
+    </HeadManager>,
+  )
+
+  expect(document.head.innerHTML).toBe(
+    '<link rel="canonical" href="http://localhost/new">',
+  )
+})

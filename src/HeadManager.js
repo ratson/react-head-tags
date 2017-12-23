@@ -26,6 +26,13 @@ function buildSelectot(component) {
       }
       break
     }
+    case 'link': {
+      const { rel } = component.props
+      if (['canonical'].includes(rel)) {
+        return `link[rel="${rel}"]`
+      }
+      break
+    }
     default:
   }
 
