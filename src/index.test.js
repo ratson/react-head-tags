@@ -4,6 +4,7 @@ import streamToPromise from 'stream-to-promise'
 import React from 'react'
 import { renderToNodeStream } from 'react-dom/server'
 import { mount } from 'enzyme'
+import delay from 'delay'
 
 import HeadTags, { HeadManager } from '.'
 
@@ -117,18 +118,20 @@ it('keep single <link rel="canonical" />', async () => {
   )
 })
 
-it('set <script type="application/ld+json">', () => {
+it('set <script type="application/ld+json">', async () => {
   document.head.innerHTML = ''
 
+  const ldJson = { '@context': 'http://schema.org' }
   mount(
     <HeadManager>
       <HeadTags>
-        <script type="application/ld+json">{'{"@context": "http://schema.org"}'}</script>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ldJson) }} />
       </HeadTags>
     </HeadManager>,
   )
+  await delay(0)
 
   expect(document.head.innerHTML).toBe(
-    '<script type="application/ld+json">{"@context": "http://schema.org"}</script>',
+    '<script type="application/ld+json">{"@context":"http://schema.org"}</script>',
   )
 })
