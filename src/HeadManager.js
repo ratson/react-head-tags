@@ -33,6 +33,9 @@ function buildSelectot(component) {
       }
       break
     }
+    // case 'script': {
+    //   return '<script type="application/ld+json">'
+    // }
     default:
   }
 

@@ -116,3 +116,19 @@ it('keep single <link rel="canonical" />', async () => {
     '<link rel="canonical" href="http://localhost/new">',
   )
 })
+
+it('set <script type="application/ld+json">', () => {
+  document.head.innerHTML = ''
+
+  mount(
+    <HeadManager>
+      <HeadTags>
+        <script type="application/ld+json">{'{"@context": "http://schema.org"}'}</script>
+      </HeadTags>
+    </HeadManager>,
+  )
+
+  expect(document.head.innerHTML).toBe(
+    '<script type="application/ld+json">{"@context": "http://schema.org"}</script>',
+  )
+})
