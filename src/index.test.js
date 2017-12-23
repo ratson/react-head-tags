@@ -2,7 +2,7 @@
 import streamToPromise from 'stream-to-promise'
 
 import React from 'react'
-import { renderToNodeStream } from 'react-dom/server'
+import { renderToString, renderToNodeStream } from 'react-dom/server'
 import { mount } from 'enzyme'
 import delay from 'delay'
 
@@ -134,4 +134,18 @@ it('set <script type="application/ld+json">', async () => {
   expect(document.head.innerHTML).toBe(
     '<script type="application/ld+json">{"@context":"http://schema.org"}</script>',
   )
+})
+
+it('throw for non-compoent children', () => {
+  document.head.innerHTML = ''
+
+  expect(() => {
+    renderToString(
+      <HeadManager>
+        <HeadTags>
+          {'not-expected'}
+        </HeadTags>
+      </HeadManager>,
+    )
+  }).toThrowError(/not-expect/)
 })

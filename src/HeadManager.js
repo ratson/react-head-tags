@@ -1,5 +1,6 @@
 /* globals document */
 import ExecutionEnvironment from 'fbjs/lib/ExecutionEnvironment'
+import invariant from 'fbjs/lib/invariant'
 
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
@@ -8,6 +9,8 @@ import NanoEvents from 'nanoevents'
 import Head from './Head'
 
 function buildSelectot(component) {
+  invariant(component.props, `Unexpected <HeadTags> children: [${typeof component}] ${component}`)
+
   const { id } = component.props
   if (id) {
     return `#${id}`
@@ -33,13 +36,13 @@ function buildSelectot(component) {
       }
       break
     }
-    // case 'script': {
-    //   return '<script type="application/ld+json">'
-    // }
     default:
   }
 
-  return JSON.stringify(component)
+  return JSON.stringify({
+    type: component.type,
+    props: component.props,
+  })
 }
 
 class HeadManager extends Component {
