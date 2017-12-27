@@ -181,11 +181,9 @@ it('works with stream', async () => {
   await streamToPromise(contentStream)
   expect(collectedHeadTags).toHaveLength(2)
 
-  const headTagsStream = renderToNodeStream(collectedHeadTags)
-
   multistream([
     intoStream('<!doctype html><html><head>'),
-    headTagsStream,
+    renderToNodeStream(collectedHeadTags),
     intoStream('</head><body>'),
     contentPass,
     intoStream('</body></html>'),

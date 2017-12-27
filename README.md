@@ -18,7 +18,7 @@ import { renderToNodeStream } from 'react-dom/server'
 import { HeadManager, HeadTags } from 'react-head-tags'
 
 let headTags
-renderToNodeStream(
+const contentStream = renderToNodeStream(
   <HeadManager
     onHeadTagsChange={tags => {
       headTags = tags
@@ -31,3 +31,6 @@ renderToNodeStream(
   </HeadManager>,
 )
 ```
+
+Note that head tags are not collected before the app is rendered,
+e.g. `headTags` is `undefined` until `contentStream` is finished in the above example.
