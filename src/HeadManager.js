@@ -9,7 +9,10 @@ import NanoEvents from 'nanoevents'
 import Head from './Head'
 
 function buildSelectot(component) {
-  invariant(component.props, `Unexpected <HeadTags> children: [${typeof component}] ${component}`)
+  invariant(
+    component.props,
+    `Unexpected <HeadTags> children: [${typeof component}] ${component}`,
+  )
 
   const { id } = component.props
   if (id) {
@@ -87,7 +90,11 @@ class HeadManager extends Component {
             selectorIndex[component] = selector
             headTags.push(component)
 
-            if (ExecutionEnvironment.canUseDOM && selector.indexOf('{') !== 0) {
+            if (
+              ExecutionEnvironment.canUseDOM &&
+              document &&
+              selector.indexOf('{') !== 0
+            ) {
               const el = document.head.querySelector(selector)
               if (el) {
                 document.head.removeChild(el)

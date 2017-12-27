@@ -1,5 +1,9 @@
 /* globals document */
+import { PassThrough } from 'stream'
+
 import streamToPromise from 'stream-to-promise'
+import intoStream from 'into-stream'
+import multistream from 'multistream'
 
 import React from 'react'
 import { renderToString, renderToNodeStream } from 'react-dom/server'
@@ -125,7 +129,10 @@ it('set <script type="application/ld+json">', async () => {
   mount(
     <HeadManager>
       <HeadTags>
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ldJson) }} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(ldJson) }}
+        />
       </HeadTags>
     </HeadManager>,
   )
@@ -142,10 +149,56 @@ it('throw for non-compoent children', () => {
   expect(() => {
     renderToString(
       <HeadManager>
-        <HeadTags>
-          {'not-expected'}
-        </HeadTags>
+        <HeadTags>not-expected</HeadTags>
       </HeadManager>,
     )
   }).toThrowError(/not-expect/)
+})
+
+it('works with stream', async () => {
+  let collectedHeadTags = []
+  const contentStream = renderToNodeStream(
+    <React.Fragment>
+      <HeadManager
+        onHeadTagsChange={headTags => {
+          collectedHeadTags = headTags
+        }}
+      >
+        <HeadTags>
+          <title>Title</title>
+          <meta name="description" content="testing" />
+        </HeadTags>
+      </HeadManager>
+      <main>Content</main>
+    </React.Fragment>,
+  )
+  const contentPass = new PassThrough()
+  const res = new PassThrough()
+
+  expect(collectedHeadTags).toHaveLength(0)
+  contentStream.pipe(contentPass)
+  expect(collectedHeadTags).toHaveLength(0)
+  await streamToPromise(contentStream)
+  expect(collectedHeadTags).toHaveLength(2)
+
+  const headTagsStream = renderToNodeStream(collectedHeadTags)
+
+  multistream([
+    intoStream('<!doctype html><html><head>'),
+    headTagsStream,
+    intoStream('</head><body>'),
+    contentPass,
+    intoStream('</body></html>'),
+  ]).pipe(res)
+
+  const data = await streamToPromise(res)
+  expect(data.toString()).toBe(
+    [
+      '<!doctype html><html><head>',
+      '<title data-reactroot="">Title</title><meta name="description" content="testing" data-reactroot=""/>',
+      '</head><body>',
+      '<main data-reactroot="">Content</main>',
+      '</body></html>',
+    ].join(''),
+  )
 })
