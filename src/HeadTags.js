@@ -1,36 +1,35 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 import invariant from 'fbjs/lib/invariant'
 
+import HeadTagsContext from './HeadTagsContext'
+
 class HeadTags extends React.Component {
-  static contextTypes = {
-    reactHeadTags: PropTypes.object,
-  }
-
-  componentWillMount() {
-    const { children } = this.props
-    const { reactHeadTags } = this.context
-
-    invariant(
-      reactHeadTags,
-      'You should not use <HeadTags> outside a <HeadManager>',
-    )
-
-    if (reactHeadTags) {
-      reactHeadTags.add(children)
-    }
-  }
-
   componentWillUnmount() {
     const { children } = this.props
-    const { reactHeadTags } = this.context
-    if (reactHeadTags) {
-      reactHeadTags.remove(children)
+    if (this.reactHeadTags) {
+      this.reactHeadTags.remove(children)
     }
   }
 
   render() {
-    return null
+    const { children } = this.props
+    return (
+      <HeadTagsContext.Consumer>
+        {reactHeadTags => {
+          this.reactHeadTags = reactHeadTags
+
+          invariant(
+            reactHeadTags,
+            'You should not use <HeadTags> outside a <HeadManager>',
+          )
+
+          if (reactHeadTags) {
+            reactHeadTags.add(children)
+          }
+          return null
+        }}
+      </HeadTagsContext.Consumer>
+    )
   }
 }
 

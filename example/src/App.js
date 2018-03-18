@@ -24,12 +24,17 @@ const Page2 = () => (
 )
 
 class App extends Component {
-  state = {
-    page: 1,
+  constructor(props) {
+    super(props)
+
+    this.state = {
+      page: 1,
+    }
+    this.changePage = this.changePage.bind(this)
   }
 
-  changePage = () => {
-    const { page } = this.stae
+  changePage() {
+    const { page } = this.state
     this.setState({
       page: page % 2 + 1,
     })

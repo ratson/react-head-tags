@@ -7,6 +7,7 @@ import PropTypes from 'prop-types'
 import NanoEvents from 'nanoevents'
 
 import Head from './Head'
+import HeadTagsContext from './HeadTagsContext'
 
 function buildSelectot(component) {
   invariant(
@@ -53,10 +54,6 @@ class HeadManager extends Component {
     children: PropTypes.node.isRequired,
   }
 
-  static childContextTypes = {
-    reactHeadTags: PropTypes.object,
-  }
-
   constructor(props) {
     super(props)
 
@@ -66,63 +63,61 @@ class HeadManager extends Component {
     this.selectorIndex = {}
   }
 
-  getChildContext() {
+  getHeadTagsContext() {
     const { headTags, headTagsIndex, selectorIndex } = this
     const { onHeadTagsChange } = this.props
     return {
-      reactHeadTags: {
-        add: children => {
-          const changes = React.Children.map(children, component => {
-            const selector = buildSelectot(component)
-            const i = headTagsIndex[selector]
-            if (i >= 0) {
-              const existingComponent = headTags[i]
-              if (existingComponent === component) {
-                return false
-              }
-              selectorIndex[component] = selectorIndex[existingComponent]
-              delete selectorIndex[existingComponent]
-              headTags[i] = component
-              return true
+      add: children => {
+        const changes = React.Children.map(children, component => {
+          const selector = buildSelectot(component)
+          const i = headTagsIndex[selector]
+          if (i >= 0) {
+            const existingComponent = headTags[i]
+            if (existingComponent === component) {
+              return false
             }
-
-            headTagsIndex[selector] = headTags.length
-            selectorIndex[component] = selector
-            headTags.push(component)
-
-            if (
-              ExecutionEnvironment.canUseDOM &&
-              document &&
-              selector.indexOf('{') !== 0
-            ) {
-              const el = document.head.querySelector(selector)
-              if (el) {
-                document.head.removeChild(el)
-              }
-            }
-
+            selectorIndex[component] = selectorIndex[existingComponent]
+            delete selectorIndex[existingComponent]
+            headTags[i] = component
             return true
-          })
+          }
 
-          if (changes.some(hasChange => hasChange)) {
-            if (onHeadTagsChange) {
-              onHeadTagsChange(headTags)
-            } else {
-              this.emitter.emit('tags', headTags)
+          headTagsIndex[selector] = headTags.length
+          selectorIndex[component] = selector
+          headTags.push(component)
+
+          if (
+            ExecutionEnvironment.canUseDOM &&
+            document &&
+            selector.indexOf('{') !== 0
+          ) {
+            const el = document.head.querySelector(selector)
+            if (el) {
+              document.head.removeChild(el)
             }
           }
-        },
-        remove: children => {
-          React.Children.forEach(children, component => {
-            const selector = selectorIndex[component]
-            const i = headTagsIndex[selector]
-            // TODO null is insert to avoid updating other indexes,
-            // should use better data structure to not use placeholder
-            headTags.splice(i, 1, null)
-            delete headTagsIndex[selector]
-            delete selectorIndex[component]
-          })
-        },
+
+          return true
+        })
+
+        if (changes.some(hasChange => hasChange)) {
+          if (onHeadTagsChange) {
+            onHeadTagsChange(headTags)
+          } else {
+            this.emitter.emit('tags', headTags)
+          }
+        }
+      },
+      remove: children => {
+        React.Children.forEach(children, component => {
+          const selector = selectorIndex[component]
+          const i = headTagsIndex[selector]
+          // TODO null is insert to avoid updating other indexes,
+          // should use better data structure to not use placeholder
+          headTags.splice(i, 1, null)
+          delete headTagsIndex[selector]
+          delete selectorIndex[component]
+        })
       },
     }
   }
@@ -130,10 +125,10 @@ class HeadManager extends Component {
   render() {
     const { children } = this.props
     return (
-      <React.Fragment>
+      <HeadTagsContext.Provider value={this.getHeadTagsContext()}>
         {children}
         <Head emitter={this.emitter} tags={this.headTags} />
-      </React.Fragment>
+      </HeadTagsContext.Provider>
     )
   }
 }
