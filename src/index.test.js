@@ -83,6 +83,31 @@ it('render title once', async () => {
   expect(wrapper).toHaveHTML('<title>Title2</title>')
 })
 
+it('remove after unmount', async () => {
+  document.head.innerHTML = ''
+
+  const App = ({ hide = false }) => (
+    <HeadManager>
+      <HeadTags>
+        <title>Title</title>
+      </HeadTags>
+      {hide ? null : (
+        <HeadTags>
+          <title>Title2</title>
+        </HeadTags>
+      )}
+    </HeadManager>
+  )
+
+  const wrapper = mount(<App />)
+
+  expect(document.head.innerHTML).toBe('<title>Title2</title>')
+  expect(wrapper).toHaveHTML('<title>Title2</title>')
+
+  wrapper.setProps({ hide: true })
+  expect(wrapper).toHaveHTML('<title>Title</title>')
+})
+
 it('accumulate different meta tags by name', async () => {
   document.head.innerHTML = ''
 
