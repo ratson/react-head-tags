@@ -1,6 +1,6 @@
 {
   "name": "react-head-tags",
-  "version": "0.0.5",
+  "version": "0.1.0",
   "description": "ReactDOMServer.renderToNodeStream() ready component to manage document.head",
   "main": "lib/index.js",
   "scripts": {
